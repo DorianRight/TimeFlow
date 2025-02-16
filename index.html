@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeFlow - Personal Time Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TimeFlow</h1>
+            <p>Track your time, boost your productivity</p>
+        </header>
+
+        <main>
+            <div class="timer-section">
+                <div class="timer-display">
+                    <span id="timer">25:00</span>
+                </div>
+                <div class="timer-controls">
+                    <button id="startBtn">Start</button>
+                    <button id="pauseBtn">Pause</button>
+                    <button id="resetBtn">Reset</button>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h2>Today's Progress</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Sessions</h3>
+                        <span id="sessions">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Focus Time</h3>
+                        <span id="focusTime">0h 0m</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
