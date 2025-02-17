@@ -4,6 +4,26 @@ let interval = null;
 let sessions = 0;
 let totalTime = 0;
 
+// Load data from localStorage
+function loadData() {
+    const saved = localStorage.getItem('timeflow-data');
+    if (saved) {
+        const data = JSON.parse(saved);
+        sessions = data.sessions || 0;
+        totalTime = data.totalTime || 0;
+    }
+}
+
+// Save data to localStorage
+function saveData() {
+    const data = {
+        sessions: sessions,
+        totalTime: totalTime,
+        lastSaved: new Date().toISOString()
+    };
+    localStorage.setItem('timeflow-data', JSON.stringify(data));
+}
+
 const timerDisplay = document.getElementById('timer');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
@@ -36,6 +56,7 @@ function startTimer() {
                 sessions++;
                 totalTime += 25 * 60;
                 updateStats();
+                saveData();
 
                 // Reset timer
                 timer = 25 * 60;
@@ -66,6 +87,7 @@ startBtn.addEventListener('click', startTimer);
 pauseBtn.addEventListener('click', pauseTimer);
 resetBtn.addEventListener('click', resetTimer);
 
-// Initialize display
+// Initialize app
+loadData();
 updateDisplay();
 updateStats();
