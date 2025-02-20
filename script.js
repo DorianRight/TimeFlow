@@ -3,6 +3,7 @@ let isRunning = false;
 let interval = null;
 let sessions = 0;
 let totalTime = 0;
+let isBreakTime = false;
 
 // Load data from localStorage
 function loadData() {
@@ -35,6 +36,15 @@ function updateDisplay() {
     const minutes = Math.floor(timer / 60);
     const seconds = timer % 60;
     timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    // Update background based on timer state
+    if (isBreakTime) {
+        document.body.style.background = 'linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%)';
+        document.querySelector('header h1').textContent = 'Break Time';
+    } else {
+        document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        document.querySelector('header h1').textContent = 'TimeFlow';
+    }
 }
 
 function updateStats() {
@@ -52,18 +62,27 @@ function startTimer() {
             updateDisplay();
 
             if (timer === 0) {
-                // Session completed
-                sessions++;
-                totalTime += 25 * 60;
-                updateStats();
-                saveData();
+                if (!isBreakTime) {
+                    // Work session completed
+                    sessions++;
+                    totalTime += 25 * 60;
+                    updateStats();
+                    saveData();
 
-                // Reset timer
-                timer = 25 * 60;
-                isRunning = false;
-                clearInterval(interval);
-
-                alert('Session completed! Great work!');
+                    // Start break
+                    isBreakTime = true;
+                    timer = 5 * 60; // 5 minute break
+                    updateDisplay();
+                    alert('Focus session done! Time for a 5-minute break.');
+                } else {
+                    // Break completed
+                    isBreakTime = false;
+                    timer = 25 * 60;
+                    updateDisplay();
+                    isRunning = false;
+                    clearInterval(interval);
+                    alert('Break over! Ready for the next session?');
+                }
             }
         }, 1000);
     }
@@ -79,6 +98,7 @@ function pauseTimer() {
 function resetTimer() {
     isRunning = false;
     clearInterval(interval);
+    isBreakTime = false;
     timer = 25 * 60;
     updateDisplay();
 }
