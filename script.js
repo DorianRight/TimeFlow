@@ -4,6 +4,7 @@ let interval = null;
 let sessions = 0;
 let totalTime = 0;
 let isBreakTime = false;
+let tasks = [];
 
 // Load data from localStorage
 function loadData() {
@@ -12,6 +13,7 @@ function loadData() {
         const data = JSON.parse(saved);
         sessions = data.sessions || 0;
         totalTime = data.totalTime || 0;
+        tasks = data.tasks || [];
     }
 }
 
@@ -20,6 +22,7 @@ function saveData() {
     const data = {
         sessions: sessions,
         totalTime: totalTime,
+        tasks: tasks,
         lastSaved: new Date().toISOString()
     };
     localStorage.setItem('timeflow-data', JSON.stringify(data));
@@ -31,6 +34,9 @@ const pauseBtn = document.getElementById('pauseBtn');
 const resetBtn = document.getElementById('resetBtn');
 const sessionsDisplay = document.getElementById('sessions');
 const focusTimeDisplay = document.getElementById('focusTime');
+const taskInput = document.getElementById('taskInput');
+const addTaskBtn = document.getElementById('addTaskBtn');
+const taskList = document.getElementById('taskList');
 
 function updateDisplay() {
     const minutes = Math.floor(timer / 60);
@@ -107,7 +113,66 @@ startBtn.addEventListener('click', startTimer);
 pauseBtn.addEventListener('click', pauseTimer);
 resetBtn.addEventListener('click', resetTimer);
 
+// Task management functions
+function addTask(text) {
+    if (text.trim()) {
+        const task = {
+            id: Date.now(),
+            text: text.trim(),
+            completed: false,
+            createdAt: new Date().toISOString()
+        };
+        tasks.push(task);
+        saveData();
+        renderTasks();
+        taskInput.value = '';
+    }
+}
+
+function toggleTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (task) {
+        task.completed = !task.completed;
+        saveData();
+        renderTasks();
+    }
+}
+
+function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    saveData();
+    renderTasks();
+}
+
+function renderTasks() {
+    taskList.innerHTML = '';
+    tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.className = 'task-item';
+        if (task.completed) li.classList.add('completed');
+
+        li.innerHTML = `
+            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}
+                   onchange="toggleTask(${task.id})">
+            <span class="task-text">${task.text}</span>
+            <button class="delete-task" onclick="deleteTask(${task.id})">×</button>
+        `;
+        taskList.appendChild(li);
+    });
+}
+
+// Event listeners
+addTaskBtn.addEventListener('click', () => addTask(taskInput.value));
+taskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTask(taskInput.value);
+});
+
+startBtn.addEventListener('click', startTimer);
+pauseBtn.addEventListener('click', pauseTimer);
+resetBtn.addEventListener('click', resetTimer);
+
 // Initialize app
 loadData();
 updateDisplay();
 updateStats();
+renderTasks();
