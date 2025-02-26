@@ -6,6 +6,33 @@ let totalTime = 0;
 let isBreakTime = false;
 let tasks = [];
 
+// Audio context for notifications
+function playNotification(type = 'complete') {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    if (type === 'complete') {
+        // Success sound - ascending tone
+        oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+        oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
+        oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
+    } else {
+        // Break sound - gentle tone
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
+    }
+
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+}
+
 // Load data from localStorage
 function loadData() {
     const saved = localStorage.getItem('timeflow-data');
@@ -79,6 +106,7 @@ function startTimer() {
                     isBreakTime = true;
                     timer = 5 * 60; // 5 minute break
                     updateDisplay();
+                    playNotification('complete');
                     alert('Focus session done! Time for a 5-minute break.');
                 } else {
                     // Break completed
@@ -87,6 +115,7 @@ function startTimer() {
                     updateDisplay();
                     isRunning = false;
                     clearInterval(interval);
+                    playNotification('break');
                     alert('Break over! Ready for the next session?');
                 }
             }
